@@ -11,6 +11,7 @@ type SelectQuery interface {
 	And(field string, value any)
 	Or(field string, value any)
 	Build(*sql.DB) (*sql.Rows, error)
+	equals(value any)
 }
 
 type SelectBuilder struct {
@@ -26,6 +27,20 @@ func (sb *SelectBuilder) Select(table string) *SelectBuilder {
 
 func (sb *SelectBuilder) Where(field string, value any) *SelectBuilder {
 	sb.statement += fmt.Sprintf("WHERE %s=", field)
+	return sb.equals(value)
+}
+
+func (sb *SelectBuilder) And(field string, value any) *SelectBuilder {
+	sb.statement += fmt.Sprintf("AND %s=", field)
+	return sb.equals(value)
+}
+
+func (sb *SelectBuilder) Or(field string, value any) *SelectBuilder {
+	sb.statement += fmt.Sprintf("OR %s=", field)
+	return sb.equals(value)
+}
+
+func (sb *SelectBuilder) equals(value any) *SelectBuilder {
 	switch value.(type) {
 	case string:
 		sb.statement += fmt.Sprintf("%s", value)
